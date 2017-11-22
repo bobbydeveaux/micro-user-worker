@@ -2,13 +2,16 @@ package main
 
 import (
 	"encoding/json"
-
+	"github.com/dvsekhvalnov/jose2go"
 	"github.com/nats-io/go-nats"
 	"log"
 	"os"
 
 	"time"
 )
+
+// need to get this from ENV, because GitHub public project will expose this. Oops.
+const passphrase string = "fbac-FJfxeMQCzXBPqrIY8Hhk"
 
 type person struct {
 	Id    int64
@@ -47,7 +50,16 @@ func main() {
 			ec.Publish(msg.Reply, p)
 		}
 
-		p.Jwt = "123abc456def789ghi"
+		payload, err := json.Marshal(p)
+		strPayload := string(payload[:])
+		log.Printf("payload is %v, ", strPayload)
+		if err != nil {
+			log.Println("error:", err)
+		}
+
+		secureToken, err := jose.Encrypt(strPayload, jose.PBES2_HS256_A128KW, jose.A256GCM, passphrase)
+
+		p.Jwt = secureToken
 
 		if err != nil {
 			log.Println(err.Error())
