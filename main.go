@@ -54,7 +54,6 @@ func main() {
 		}
 
 		if p.Valid == false {
-			p.Jwt = "invalid"
 			ec.Publish(msg.Reply, p)
 		}
 
