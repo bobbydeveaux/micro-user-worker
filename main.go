@@ -16,7 +16,7 @@ type person struct {
 	Id          int64
 	Name        string
 	Valid       bool
-	Jwt         jwtToken
+	Jwt         string
 	AccessToken accessToken
 }
 
@@ -84,11 +84,11 @@ func main() {
 				log.Println("Error in Request: %v\n", nc.LastError())
 			}
 			log.Println("Error in Request: %v\n", err)
-			p.Jwt.Value = "error with auth.jwt service"
+			p.Jwt = "error with auth.jwt service"
 		} else {
 			log.Printf("Published Access Token[%s] : '%s'\n", "auth.jwt", p.AccessToken)
 			log.Printf("Received JWT [%v] : '%s'\n", jwt.Value)
-			p.Jwt = jwt
+			p.Jwt = jwt.Value
 		}
 
 		if err != nil {
