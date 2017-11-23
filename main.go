@@ -16,8 +16,8 @@ type person struct {
 	Id          int64
 	Name        string
 	Valid       bool
-	Jwt         jwtToken
-	AccessToken accessToken
+	Jwt         string
+	AccessToken string
 }
 
 type accessToken struct {
@@ -26,8 +26,7 @@ type accessToken struct {
 }
 
 type jwtToken struct {
-	Value  string
-	Expiry int
+	Value string
 }
 
 func main() {
