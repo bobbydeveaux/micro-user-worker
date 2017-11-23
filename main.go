@@ -16,16 +16,18 @@ type person struct {
 	Id          int64
 	Name        string
 	Valid       bool
-	Jwt         string
-	AccessToken string
+	Jwt         jwtToken
+	AccessToken accessToken
 }
 
 type accessToken struct {
-	Value string
+	Value  string
+	Expiry int
 }
 
 type jwtToken struct {
-	Value string
+	Value  string
+	Expiry int
 }
 
 func main() {
@@ -64,11 +66,11 @@ func main() {
 				log.Println("Error in Request: %v\n", nc.LastError())
 			}
 			log.Println("Error in Request: %v\n", err)
-			p.AccessToken = "error with auth.generateaccesstoken service"
+			p.AccessToken.Value = "error with auth.generateaccesstoken service"
 		} else {
 			log.Printf("Published [%s] : '%s'\n", "auth.generateaccesstoken", p.Name)
 			log.Printf("Received Token [%v] : '%s'\n", at.Value)
-			p.AccessToken = at.Value
+			p.AccessToken = at
 		}
 
 		var jwt jwtToken
@@ -78,11 +80,11 @@ func main() {
 				log.Println("Error in Request: %v\n", nc.LastError())
 			}
 			log.Println("Error in Request: %v\n", err)
-			p.Jwt = "error with auth.jwt service"
+			p.Jwt.Value = "error with auth.jwt service"
 		} else {
 			log.Printf("Published Access Token[%s] : '%s'\n", "auth.jwt", p.AccessToken)
 			log.Printf("Received JWT [%v] : '%s'\n", jwt.Value)
-			p.Jwt = jwt.Value
+			p.Jwt = jwt
 		}
 
 		if err != nil {
