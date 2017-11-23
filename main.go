@@ -47,7 +47,7 @@ func main() {
 			log.Println("Error in Request: %v\n", err)
 		} else {
 			log.Printf("Published [%s] : '%s'\n", "user.auth", p.Name)
-			log.Printf("Received [%v] : '%s'\n", p.Id, p.Name)
+			log.Printf("Received Auth [%v] : '%s'\n", p.Id, p.Name)
 		}
 
 		if p.Valid == false {
@@ -64,7 +64,7 @@ func main() {
 			log.Println("Error in Request: %v\n", err)
 		} else {
 			log.Printf("Published [%s] : '%s'\n", "auth.generateaccesstoken", p.Name)
-			log.Printf("Received [%v] : '%s'\n", p.Id, p.Name)
+			log.Printf("Received Token [%v] : '%s'\n", at.Value)
 		}
 
 		payload, err := json.Marshal(p)
