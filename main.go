@@ -16,12 +16,17 @@ type person struct {
 	Id          int64
 	Name        string
 	Valid       bool
-	Jwt         string
-	AccessToken string
+	Jwt         jwtToken
+	AccessToken accessToken
 }
 
 type accessToken struct {
 	Value  string
+	Expiry int
+}
+
+type jwtAuth struct {
+	User   person
 	Expiry int
 }
 
