@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/dvsekhvalnov/jose2go"
 	"github.com/nats-io/go-nats"
 	"log"
 	"os"
@@ -22,6 +21,10 @@ type person struct {
 }
 
 type accessToken struct {
+	Value string
+}
+
+type jwtToken struct {
 	Value string
 }
 
@@ -67,17 +70,21 @@ func main() {
 			log.Printf("Received Token [%v] : '%s'\n", at.Value)
 		}
 
-		payload, err := json.Marshal(p)
-		strPayload := string(payload[:])
-		log.Printf("payload is %v, ", strPayload)
+		p.AccessToken = at.Value
+
+		var jwt jwtToken
+		err = ec.Request("auth.jwt", p, &jwt, 100*time.Millisecond)
 		if err != nil {
-			log.Println("error:", err)
+			if nc.LastError() != nil {
+				log.Println("Error in Request: %v\n", nc.LastError())
+			}
+			log.Println("Error in Request: %v\n", err)
+		} else {
+			log.Printf("Published Access Token[%s] : '%s'\n", "auth.jwt", p.AccessToken)
+			log.Printf("Received JWT [%v] : '%s'\n", jwt.Value)
 		}
 
-		secureToken, err := jose.Encrypt(strPayload, jose.PBES2_HS256_A128KW, jose.A256GCM, passphrase)
-
-		p.Jwt = secureToken
-		p.AccessToken = at.Value
+		p.Jwt = jwt.Value
 
 		if err != nil {
 			log.Println(err.Error())
