@@ -14,10 +14,15 @@ import (
 const passphrase string = "fbac-FJfxeMQCzXBPqrIY8Hhk"
 
 type person struct {
-	Id    int64
-	Name  string
-	Valid bool
-	Jwt   string
+	Id          int64
+	Name        string
+	Valid       bool
+	Jwt         string
+	AccessToken string
+}
+
+type accessToken struct {
+	Value string
 }
 
 func main() {
@@ -41,13 +46,25 @@ func main() {
 			}
 			log.Println("Error in Request: %v\n", err)
 		} else {
-			log.Printf("Published [%s] : '%s'\n", "newuser", p.Name)
+			log.Printf("Published [%s] : '%s'\n", "user.auth", p.Name)
 			log.Printf("Received [%v] : '%s'\n", p.Id, p.Name)
 		}
 
 		if p.Valid == false {
 			p.Jwt = "invalid"
 			ec.Publish(msg.Reply, p)
+		}
+
+		var at accessToken
+		err = ec.Request("auth.generateaccesstoken", p, &at, 100*time.Millisecond)
+		if err != nil {
+			if nc.LastError() != nil {
+				log.Println("Error in Request: %v\n", nc.LastError())
+			}
+			log.Println("Error in Request: %v\n", err)
+		} else {
+			log.Printf("Published [%s] : '%s'\n", "auth.generateaccesstoken", p.Name)
+			log.Printf("Received [%v] : '%s'\n", p.Id, p.Name)
 		}
 
 		payload, err := json.Marshal(p)
@@ -60,6 +77,7 @@ func main() {
 		secureToken, err := jose.Encrypt(strPayload, jose.PBES2_HS256_A128KW, jose.A256GCM, passphrase)
 
 		p.Jwt = secureToken
+		p.AccessToken = at.Value
 
 		if err != nil {
 			log.Println(err.Error())
