@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/couchbase/gocb"
 	"github.com/nats-io/go-nats"
 	"log"
 	"os"
+	"strconv"
 
 	"time"
 )
@@ -12,9 +14,13 @@ import (
 // need to get this from ENV, because GitHub public project will expose this. Oops.
 const passphrase string = "fbac-FJfxeMQCzXBPqrIY8Hhk"
 
+var bucket *gocb.Bucket
+
 type person struct {
 	Id          int64
 	Name        string
+	Email       string
+	Password    string
 	Valid       bool
 	Jwt         string
 	AccessToken accessToken
@@ -39,6 +45,8 @@ func main() {
 	nc, _ := nats.Connect(os.Getenv("NATS_HOST"))
 	ec, _ := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
 	defer ec.Close()
+
+	gocb.SetLogger(gocb.VerboseStdioLogger())
 
 	var p person
 	ec.QueueSubscribe("user.login", "job_workers", func(msg *nats.Msg) {
@@ -141,10 +149,14 @@ func main() {
 			log.Println(err.Error())
 		}
 
+		cluster, _ := gocb.Connect("http://couchbase-server:8091")
+		bucket, _ = cluster.OpenBucket("users", "password")
+
 		// @TODO save against database
 		p.Id = int64(time.Now().UnixNano())
-		p.Name = "Username"
-		p.Valid = true
+
+		bucket.Insert(strconv.Itoa(int(p.Id)), &p, 0)
+
 		if err != nil {
 			log.Println(err.Error())
 		}
