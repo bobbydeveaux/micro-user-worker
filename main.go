@@ -155,7 +155,7 @@ func main() {
 		// @TODO save against database
 		p.Id = int64(time.Now().UnixNano())
 
-		_, err = bucket.Insert(strconv.Itoa(int(p.Id)), &p, 0)
+		_, err = bucket.Insert("1", &p, 0)
 
 		if err != nil {
 			log.Println(err.Error())
