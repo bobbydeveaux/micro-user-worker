@@ -168,7 +168,7 @@ func main() {
 		if err != nil {
 			log.Println(err.Error())
 		}
-		ec.Publish(msg.Reply, p)
+		ec.Publish(msg.Reply, u)
 	})
 
 	select {}
