@@ -26,6 +26,13 @@ type person struct {
 	AccessToken accessToken
 }
 
+type User struct {
+	Id       int64
+	Name     string
+	Email    string
+	Password string
+}
+
 type accessToken struct {
 	Value  string
 	Expiry int
@@ -142,9 +149,10 @@ func main() {
 		ec.Publish(msg.Reply, p)
 	})
 
+	var u User
 	ec.QueueSubscribe("user.createuser", "job_workers", func(msg *nats.Msg) {
 		log.Printf("Creating user: %s\n", msg.Data)
-		err := json.Unmarshal(msg.Data, &p)
+		err := json.Unmarshal(msg.Data, &u)
 		if err != nil {
 			log.Println(err.Error())
 		}
@@ -153,9 +161,9 @@ func main() {
 		bucket, _ = cluster.OpenBucket("users", "password")
 
 		// @TODO save against database
-		p.Id = int64(time.Now().UnixNano())
+		u.Id = int64(time.Now().UnixNano())
 
-		_, err = bucket.Insert(strconv.Itoa(int(p.Id)), &p, 0)
+		_, err = bucket.Insert(strconv.Itoa(int(u.Id)), u, 0)
 
 		if err != nil {
 			log.Println(err.Error())
